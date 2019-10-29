@@ -1,19 +1,19 @@
 import React, {Component} from 'react';
-import { BaseEntryUpdateContentAction } from "kaltura-typescript-client/api/types/BaseEntryUpdateContentAction";
-import { KalturaMediaEntry } from "kaltura-typescript-client/api/types/KalturaMediaEntry";
-import { KalturaMediaType } from "kaltura-typescript-client/api/types/KalturaMediaType";
-import { KalturaUploadedFileTokenResource } from "kaltura-typescript-client/api/types/KalturaUploadedFileTokenResource";
-import { MediaAddAction } from "kaltura-typescript-client/api/types/MediaAddAction";
-import { BaseEntryDeleteAction } from "kaltura-typescript-client/api/types/BaseEntryDeleteAction";
-import { UploadTokenUploadAction } from "kaltura-typescript-client/api/types/UploadTokenUploadAction";
-import { UploadTokenAddAction } from "kaltura-typescript-client/api/types/UploadTokenAddAction";
-import { CancelableAction } from "kaltura-typescript-client/cancelable-action";
+import {BaseEntryUpdateContentAction} from "kaltura-typescript-client/api/types/BaseEntryUpdateContentAction";
+import {KalturaMediaEntry} from "kaltura-typescript-client/api/types/KalturaMediaEntry";
+import {KalturaMediaType} from "kaltura-typescript-client/api/types/KalturaMediaType";
+import {KalturaUploadedFileTokenResource} from "kaltura-typescript-client/api/types/KalturaUploadedFileTokenResource";
+import {MediaAddAction} from "kaltura-typescript-client/api/types/MediaAddAction";
+import {BaseEntryDeleteAction} from "kaltura-typescript-client/api/types/BaseEntryDeleteAction";
+import {UploadTokenUploadAction} from "kaltura-typescript-client/api/types/UploadTokenUploadAction";
+import {UploadTokenAddAction} from "kaltura-typescript-client/api/types/UploadTokenAddAction";
+import {CancelableAction} from "kaltura-typescript-client/cancelable-action";
 import {
     KalturaClient,
     KalturaMultiRequest,
     KalturaMultiResponse
 } from "kaltura-typescript-client";
-import { KalturaUploadToken } from "kaltura-typescript-client/api/types";
+import {KalturaUploadToken} from "kaltura-typescript-client/api/types";
 
 type Props = {
     client: KalturaClient | undefined;
@@ -83,8 +83,8 @@ export class UploadManager extends Component<Props, State> {
      * 4.Upload token with media
      */
     upload() {
-        const { mediaType, entryName, conversionProfileId, onUploadStarted } = this.props;
-        const { client } = this.props;
+        const {mediaType, entryName, conversionProfileId, onUploadStarted} = this.props;
+        const {client} = this.props;
 
         if (!client) {
             this.throwError(new Error("Cannot connect to Kaltura server"));
@@ -159,7 +159,7 @@ export class UploadManager extends Component<Props, State> {
      * Upload media file with given tokenId. Uses chunks if needed (file above 5MB)
      */
     addMedia(tokenId: string) {
-        const { client, onUploadEnded, onUploadProgress } = this.props;
+        const {client, onUploadEnded, onUploadProgress} = this.props;
         if (!client) {
             this.throwError(new Error("Missing client object"));
             return;
@@ -168,31 +168,20 @@ export class UploadManager extends Component<Props, State> {
             return;
         }
 
-        let blob = new Blob(this.props.recordedBlobs, { type: "image/jpeg" });
-        const file = new File([blob], "boboa.png");
+        let blob = new Blob(this.props.recordedBlobs, {type: "image/jpeg"});
+        const file = new File([blob], "boboa.jpeg");
 
-        var r = new FileReader();
-
-        //onload handler
-        r.onload = (e:any) => {
-            var contents = e.target.result;
-            var buffer = r.result;
-            debugger;
-            /*further processing goes here!*/
-        }
-
-        r.readAsArrayBuffer(file);
 
         // keep request so it can be canceled
         const addMediaRequest = new UploadTokenUploadAction({
             uploadTokenId: tokenId,
-            fileData: file as File
+            fileData: file
         });
 
         this.cancellableUploadAction = client.request(
             addMediaRequest.setProgress((loaded: number, total: number) => {
                 if (!this.state.abort) {
-                    this.setState({ loaded: loaded }); // loaded bytes until now
+                    this.setState({loaded: loaded}); // loaded bytes until now
                     if (onUploadProgress) {
                         onUploadProgress(loaded, total);
                     }
@@ -212,14 +201,14 @@ export class UploadManager extends Component<Props, State> {
     }
 
     handleCancel = () => {
-        const { client, onUploadCancelled } = this.props;
+        const {client, onUploadCancelled} = this.props;
 
         if (!client) {
             this.throwError(new Error("Missing client object"));
             return;
         }
 
-        this.setState({ abort: true });
+        this.setState({abort: true});
 
         // Cancel request if not finished yet
         if (this.cancellableUploadAction) {
@@ -234,7 +223,7 @@ export class UploadManager extends Component<Props, State> {
     };
 
     deleteEntry = () => {
-        const { client } = this.props;
+        const {client} = this.props;
         if (client) {
             if (this.entryId) {
                 const request = new BaseEntryDeleteAction({
@@ -254,6 +243,6 @@ export class UploadManager extends Component<Props, State> {
     }
 
     render() {
-        return <div />;
+        return <div/>;
     }
 }
