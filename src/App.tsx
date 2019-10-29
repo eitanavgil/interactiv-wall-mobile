@@ -8,6 +8,7 @@ import but from './but.png';
 import {UploadManager} from "./componenets/uploader/uploadManager";
 import {KalturaClient} from "kaltura-typescript-client";
 import {KalturaMediaType} from "kaltura-typescript-client/api/types";
+import {decode} from "base64-arraybuffer";
 
 export enum PreviewMode {
     init = "init",
@@ -39,55 +40,15 @@ const App: React.FC = () => {
         setClient(kalturaClient);
 
     }, []);
-
-    const capture2 = (evt: any) => {
-        var f = evt.target.files[0];
-
-        if (f) {
-            var r = new FileReader();
-            //onload handler
-            r.onload = (e: any) => {
-                var contents = e.target.result;
-                var buffer = r.result;
-                setBlob(buffer);
-                /*further processing goes here!*/
-            };
-            r.readAsArrayBuffer(f);
-
-        } else {
-            alert("Failed to load file");
-        }
-    }
     const capture = useCallback(
         () => {
             if (webcamRef.current) {
                 // we have an active camera
                 const camera: any = webcamRef.current;
                 if (camera!.getScreenshot) {
-                    const hhh = camera.getScreenshot();
-                    // debugger;
-                    setBlob(hhh);
-
-                    // let ctx = camera.getCanvas().getContext('2d');
-                    // let imageData = ctx.getImageData(0, 0, 1161, 870);
-
-
-                    // let blob = new Blob(imageData, {type: "image/jpeg"});
-                    // const file = new File([blob], "boboa.jpeg");
-                    //
-                    // var a = document.createElement("a"),
-                    //     url = URL.createObjectURL(file);
-                    // a.href = url;
-                    // a.download = "popo.jpeg";
-                    // document.body.appendChild(a);
-                    // a.click();
-                    // setTimeout(function () {
-                    //     document.body.removeChild(a);
-                    //     window.URL.revokeObjectURL(url);
-                    // }, 0);
-
-
-                    // setBlob(imageData);
+                    const jpegBase64 = camera.getScreenshot();
+                    const imageByteArray = decode(jpegBase64.split(",")[1]);
+                    setBlob(imageByteArray);
                 }
             }
         },
@@ -143,6 +104,7 @@ const App: React.FC = () => {
                                    }}
                                    onUploadEnded={(entryId) => {
                                        console.log(">>>> ENDED ", entryId)
+                                       setBlob(null)
                                    }}
                                    onUploadStarted={(entryId) => {
                                        console.log(">>>> STARTED ", entryId)
