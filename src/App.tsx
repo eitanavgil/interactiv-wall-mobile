@@ -13,20 +13,61 @@ import {decode} from "base64-arraybuffer";
 export enum PreviewMode {
     init = "init",
     preview = "preview",
+    upload = "upload",
     camera = "camera"
+}
+
+export enum CameraStatus {
+    init = "init",
+    ready = "ready",
 }
 
 const App: React.FC = () => {
 
     const webcamRef = useRef(null);
-
-    const ks = "WY4NGM2NzU5ZTAyZDZlNDgyMGNjYmQ3ZTI4NWFiZDA1ZjZlNzBiY3wyNzAxNzsyNzAxNzsxNTcyNDE5NTU2OzI7MTU3MjMzMzE1Ni4xNDg1O2VpdGFuLmF2Z2lsQGthbHR1cmEuY29tO2Rpc2FibGVlbnRpdGxlbWVudCxhcHBpZDprbWM7Ow==";
+    const previewRef = useRef(null);
+    const camEffect = useRef(null);
+    const uploadManager = useRef(null);
+    const ks = "GFiMGRhMTI5Nzk1ZGJhMDRjMDcyODExMGYwN2ZkOGZlMjJmMjZhN3wyNzAxNzsyNzAxNzsxNTcyNTA1MzAwOzI7MTU3MjQxODkwMC44NzkyO2VpdGFuLmF2Z2lsQGthbHR1cmEuY29tO2Rpc2FibGVlbnRpdGxlbWVudCxhcHBpZDprbWM7Ow==";
 
     // const [ks, setKs] = useState();
     const [client, setClient] = useState();
     const [blob, setBlob] = useState();
+    const [camStatus, setCameraStatus] = useState(CameraStatus.init);
     const [previewMode, setPreviewMode] = useState(PreviewMode.camera);
 
+    const buttonClicked = (isPreview?: boolean) => {
+        if (previewMode === PreviewMode.camera && webcamRef.current) {
+            setPreviewMode(PreviewMode.preview);
+            // we have an active camera
+            const camera: any = webcamRef.current;
+            if (camera!.getScreenshot) {
+                const jpegBase64 = camera.getScreenshot();
+                (previewRef.current as any).src = jpegBase64;
+                const imageByteArray = decode(jpegBase64.split(",")[1]);
+                setBlob(imageByteArray);
+            }
+        } else if (previewMode === PreviewMode.preview) {
+            setPreviewMode(PreviewMode.upload);
+        }
+    };
+
+    // cammera shutter effect
+    useEffect(() => {
+        if (previewMode === PreviewMode.camera) {
+            (previewRef.current as any).src = "";
+        }
+        if (previewMode === PreviewMode.preview || previewMode === PreviewMode.camera) {
+            // change to preview - show effect
+            (camEffect.current as any).classList.add("show");
+            setTimeout(() => {
+                (camEffect.current as any).classList.remove("show");
+            }, 100);
+        }
+    }, [previewMode]);
+
+
+    // one time loaded
     useEffect(() => {
         // Update the document title using the browser API
         const kalturaClient = new KalturaClient();
@@ -40,70 +81,67 @@ const App: React.FC = () => {
         setClient(kalturaClient);
 
     }, []);
-    const capture = useCallback(
-        () => {
-            if (webcamRef.current) {
-                // we have an active camera
-                const camera: any = webcamRef.current;
-                if (camera!.getScreenshot) {
-                    const jpegBase64 = camera.getScreenshot();
-                    const imageByteArray = decode(jpegBase64.split(",")[1]);
-                    setBlob(imageByteArray);
-                }
-            }
-        },
-        [webcamRef]
-    );
 
     return (
-        <div className="App">
+        <div className={"App " + previewMode}>
             <header className="App-header">
+                <div className="cam-effect" ref={camEffect}></div>
+
+                <div className="loader-container">
+                    <div className="loader"></div>
+                </div>
+
                 {previewMode === PreviewMode.preview &&
                 <button><img src={xx} alt="Close" className={"close-button"}
-                             onClick={() => setPreviewMode(PreviewMode.camera)}
+                             onClick={() => {
+                                 setBlob(null);
+                                 setPreviewMode(PreviewMode.camera)
+                             }}
                 /></button>
                 }
                 <img src={logo} alt="Logo" className={"logo"}/>
                 <div className="camera-preview-container">
-                    {previewMode === PreviewMode.preview &&
-                    <div className="preview-container"></div>
-                    }
-                    {previewMode === PreviewMode.camera &&
+                    <div className={"preview-container " + PreviewMode.preview}>
+                        <img id={"preview-image"} ref={previewRef}></img>
+                    </div>
                     <Webcam audio={false} imageSmoothing={false}
                             ref={webcamRef}
                             videoConstraints={{
                                 facingMode: "user"
                             }}
                             onUserMedia={() => {
+                                setCameraStatus(CameraStatus.ready)
                             }}
                             onUserMediaError={() => {
+                                console.log(">>>> OUME");
                             }}
                             screenshotFormat={"image/jpeg"} screenshotQuality={1}/>
-                    }
                 </div>
-                {/*
-                   // onClick={() => setPreviewMode(PreviewMode.preview)}
-                */}
-                <button className={"button"}
-                        onClick={capture}
-                >
-                    {previewMode === PreviewMode.camera &&
-                    <img src={but} alt="Capture" className={"but"}/>
-                    }
-                    {previewMode === PreviewMode.preview &&
-                    <img src={send} alt="Send" className={"send"}/>
-                    }
-                </button>
                 {
-                    blob && client &&
+                    camStatus === CameraStatus.ready &&
+                    <button className={"button"}
+                            onClick={() => buttonClicked()}
+                    >
+                        {previewMode === PreviewMode.camera &&
+                        <img src={but} alt="Capture" className={"but"}/>
+                        }
+                        {(previewMode === PreviewMode.preview || previewMode === PreviewMode.upload) &&
+                        <img src={send} alt="Send" className={"send"}/>
+                        }
+                    </button>
+                }
+                {
+                    blob && client && previewMode === PreviewMode.upload &&
                     <UploadManager client={client}
+                                   ref={uploadManager}
                                    mediaType={KalturaMediaType.image}
                                    recordedBlobs={[blob]}
                                    onError={(error) => {
                                        console.log("Error:", error)
                                    }}
                                    onUploadEnded={(entryId) => {
-                                       console.log(">>>> ENDED ", entryId)
+                                       console.log(">>>> ENDED",);
+                                       setPreviewMode(PreviewMode.camera)
                                        setBlob(null)
                                    }}
                                    onUploadStarted={(entryId) => {
@@ -113,7 +151,6 @@ const App: React.FC = () => {
                                    onUploadProgress={(loaded, total) => {
                                        console.log(">>> ", loaded, total)
                                    }}
-
                                    entryName={"bobo.png"}
                                    serviceUrl={"https://www.kaltura.com"}
                                    ks={ks}/>
