@@ -70,20 +70,23 @@ video {
 }
 
 .cam-effect {
-  position: absolute;
   width: 1px;
   height: 1px;
-  background-color: white;
-  z-index: 5000000;
   opacity: 0;
 }
-
+.error,
 .cam-effect.show {
+  position: absolute;
+  z-index: 5000000;
+  background-color: white;
   width: 100%;
   height: 100%;
   opacity: 1;
 }
-
+.error{
+  color: white;
+  background-image: url("./bg.png");
+}
 .loader-container {
   position: absolute;
   width: 100%;
@@ -116,6 +119,29 @@ video {
   transform: translateZ(0);
   -webkit-animation: load6 1.7s infinite ease, round 1.7s infinite ease;
   animation: load6 1.7s infinite ease, round 1.7s infinite ease;
+}
+
+.error-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  text-align: center;
+  margin: 10% 0;
+  min-height: 80%;
+  background-color: rgba(33, 33, 33, .3);
+  align-items: center;
+  //vertical-align: center;
+  //align-content: center;
+  //height: 80%;
+  //background-color: #09d3ac;
+}
+
+.sad{
+  padding-top: 40px;
+  max-width: 48px;
+  max-height: 48px;
 }
 
 @-webkit-keyframes load6 {
