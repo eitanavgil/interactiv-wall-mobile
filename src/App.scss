@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  background-image: url("./bg.png");
+  font-family: 'Lato', sans-serif;
 }
 
 .App-logo {
@@ -7,12 +9,11 @@
 }
 
 .App-header {
-  background-image: url("./bg.png");
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: normal;
   font-size: calc(10px + 2vmin);
 }
 
@@ -20,7 +21,10 @@
   color: #09d3ac;
 }
 
-.preview-image,
+.preview-image {
+  height: 200px;
+}
+
 video {
   width: 100%;
   max-height: 200px;
@@ -29,6 +33,7 @@ video {
 .logo {
   max-width: 140px;
   padding-bottom: 2em;
+  padding-top: 2em;
 }
 
 .button {
@@ -58,43 +63,55 @@ video {
 }
 
 .camera-preview-container {
-  min-height: 250px;
+  min-height: 200px;
+  max-height: 200px;
   min-width: 100%;
 }
 
 .preview-container.preview {
-  //position: initial;
   width: 100%;
-  min-height: 220px;
+  max-height: 200px;
   opacity: 1;
 }
 
 .cam-effect {
   width: 1px;
   height: 1px;
-  opacity: 0;
+  transition: background-color 0.5s linear;
+  background-color: black;
 }
+
+
+.cam-effect.show {
+  background-color: transparent;
+}
+
 .error,
 .cam-effect.show {
   position: absolute;
   z-index: 5000000;
-  background-color: white;
   width: 100%;
   height: 100%;
   opacity: 1;
 }
-.error{
-  color: white;
-  background-image: url("./bg.png");
-}
+
 .loader-container {
   position: absolute;
   width: 100%;
   height: 100%;
+  left: 0;
   background-color: rgba(0, 0, 0, 0.7);
-  z-index: 555555555;
-  padding-top: 100%;
+  z-index: 200;
+  padding-top: 40%;
   display: none;
+}
+
+.error,
+.notSupported,
+.done {
+  .camera-preview-container {
+    display: none;
+  }
 }
 
 .upload {
@@ -121,7 +138,9 @@ video {
   animation: load6 1.7s infinite ease, round 1.7s infinite ease;
 }
 
-.error-container{
+.done-container,
+.not-supported-container,
+.error-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,8 +148,7 @@ video {
   width: 100%;
   text-align: center;
   margin: 10% 0;
-  min-height: 80%;
-  background-color: rgba(33, 33, 33, .3);
+  background-color: rgba(33, 33, 33, .9);
   align-items: center;
   //vertical-align: center;
   //align-content: center;
@@ -138,7 +156,18 @@ video {
   //background-color: #09d3ac;
 }
 
-.sad{
+.not-supported,
+.done,
+.error {
+  color: white;
+  background-image: url("./bg.png");
+  height: 100vh;
+  width: 100%;
+}
+
+.happy,
+.baa,
+.sad {
   padding-top: 40px;
   max-width: 48px;
   max-height: 48px;

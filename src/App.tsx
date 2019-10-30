@@ -4,6 +4,8 @@ import Webcam from "react-webcam";
 import logo from './logo.png';
 import xx from './x.png';
 import send from './send.png';
+import baa from './baa.png';
+import happy from './happy.png';
 import but from './but.png';
 import sad from './sad.png';
 import {UploadManager} from "./componenets/uploader/uploadManager";
@@ -12,9 +14,10 @@ import {KalturaMediaType} from "kaltura-typescript-client/api/types";
 import {decode} from "base64-arraybuffer";
 
 export enum AppState {
-    init = "init",
     preview = "preview",
     upload = "upload",
+    done = "done",
+    notSupported = "notSupported",
     error = "error",
     camera = "camera"
 }
@@ -28,10 +31,9 @@ const App: React.FC = () => {
 
     const webcamRef = useRef(null);
     const previewRef = useRef(null);
-    const errorScreen = useRef(null);
     const camEffect = useRef(null);
     const uploadManager = useRef(null);
-    const ks = "LIeGFiMGRhMTI5Nzk1ZGJhMDRjMDcyODExMGYwN2ZkOGZlMjJmMjZhN3wyNzAxNzsyNzAxNzsxNTcyNTA1MzAwOzI7MTU3MjQxODkwMC44NzkyO2VpdGFuLmF2Z2lsQGthbHR1cmEuY29tO2Rpc2FibGVlbnRpdGxlbWVudCxhcHBpZDprbWM7Ow==";
+    const ks = "LieMGQ4YzVhYTA4NGVkNWIyODEwNTgyZDAyNjllMzFlZmE2ZmJkZTlmN3wyNzAxNzsyNzAxNzsxNTcyNTQ0MTI2OzI7MTU3MjQ1NzcyNi4xODE4O2VpdGFuLmF2Z2lsQGthbHR1cmEuY29tO2Rpc2FibGVlbnRpdGxlbWVudCxhcHBpZDprbWM7Ow==";
 
     // const [ks, setKs] = useState();
     const [client, setClient] = useState();
@@ -65,7 +67,7 @@ const App: React.FC = () => {
             (camEffect.current as any).classList.add("show");
             setTimeout(() => {
                 (camEffect.current as any).classList.remove("show");
-            }, 100);
+            }, 500);
         }
     }, [appState]);
 
@@ -87,38 +89,64 @@ const App: React.FC = () => {
 
     return (
         <div className={"App " + appState}>
-            <header className="App-header">
-                {appState === AppState.error &&
-                <div className="error" ref={errorScreen}>
-                    <div className="error-container">
-                        <div>
-                            Something went wrong
-                        </div>
-                        <div>
-                            , Please try again.
-                        </div>
-                        <img className={"sad"} src={sad} alt="Booo..."/>
+            <div className="loader-container">
+                <div className="loader"></div>
+            </div>
+
+            <div className="cam-effect" ref={camEffect}></div>
+            <img src={logo} alt="Logo" className={"logo"}/>
+            {appState === AppState.error &&
+            <div className="error-container">
+                <div className="error">
+                    <div>
+                        Something went wrong
                     </div>
+                    <div>
+                        Please try again later.
+                    </div>
+                    <img className={"sad"} src={sad} alt="Booo..."/>
                 </div>
-                }
-                <div className="cam-effect" ref={camEffect}></div>
-
-                <div className="loader-container">
-                    <div className="loader"></div>
+            </div>
+            }
+            {appState === AppState.notSupported &&
+            <div className="not-supported-container">
+                <div className="not-supported">
+                    <div>
+                        Something went wrong, try again
+                    </div>
+                    <div>
+                        use your friend's phone or grab a beer
+                    </div>
+                    <img className={"baa"} src={baa} alt="Bummer..."/>
                 </div>
+            </div>
+            }
+            {appState === AppState.done &&
+            <div className="done-container">
+                <div className="done">
+                    <div>
+                        Your image will be shown
+                    </div>
+                    <div>
+                        soon on the wall
+                    </div>
+                    <img className={"happy"} src={happy} alt="Yey..."/>
+                </div>
+            </div>
+            }
+            <header className="App-header">
 
-                {appState === AppState.preview &&
-                <button><img src={xx} alt="Close" className={"close-button"}
-                             onClick={() => {
-                                 setBlob(null);
-                                 setAppState(AppState.camera)
-                             }}
+                {(appState === AppState.preview || appState === AppState.done ) &&
+                <button className={"button"}><img src={xx} alt="Close" className={"close-button"}
+                                                  onClick={() => {
+                                                      setBlob(null);
+                                                      setAppState(AppState.camera)
+                                                  }}
                 /></button>
                 }
-                <img src={logo} alt="Logo" className={"logo"}/>
                 <div className="camera-preview-container">
                     <div className={"preview-container " + AppState.preview}>
-                        <img id={"preview-image"} ref={previewRef}></img>
+                        <img className={"preview-image"} ref={previewRef}></img>
                     </div>
                     <Webcam audio={false} imageSmoothing={false}
                             ref={webcamRef}
@@ -129,7 +157,7 @@ const App: React.FC = () => {
                                 setCameraStatus(CameraStatus.ready)
                             }}
                             onUserMediaError={() => {
-                                console.log(">>>> OUME");
+                                setAppState(AppState.notSupported)
                             }}
                             screenshotFormat={"image/jpeg"} screenshotQuality={1}/>
                 </div>
@@ -155,11 +183,13 @@ const App: React.FC = () => {
                                    onError={(error) => {
                                        setAppState(AppState.error)
                                    }}
+
                                    onUploadEnded={(entryId) => {
                                        console.log(">>>> ENDED",);
-                                       setAppState(AppState.camera)
-                                       setBlob(null)
+                                       setAppState(AppState.done);
+                                       setBlob(null);
                                    }}
+
                                    onUploadStarted={(entryId) => {
                                        console.log(">>>> STARTED ", entryId)
                                    }}

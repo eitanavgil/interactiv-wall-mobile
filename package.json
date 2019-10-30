@@ -7,6 +7,7 @@
     "@types/node": "12.11.7",
     "@types/react": "16.9.11",
     "@types/react-dom": "16.9.3",
+    "base64-arraybuffer": "^0.2.0",
     "kaltura-typescript-client": "file:libs/kaltura-typescript-client-6.4.2-v20181223-153243.tgz",
     "node-sass": "^4.13.0",
     "react": "^16.11.0",
