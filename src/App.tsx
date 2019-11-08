@@ -33,7 +33,7 @@ const App: React.FC = () => {
     const previewRef = useRef(null);
     const camEffect = useRef(null);
     const uploadManager = useRef(null);
-    const ks = "LieMGQ4YzVhYTA4NGVkNWIyODEwNTgyZDAyNjllMzFlZmE2ZmJkZTlmN3wyNzAxNzsyNzAxNzsxNTcyNTQ0MTI2OzI7MTU3MjQ1NzcyNi4xODE4O2VpdGFuLmF2Z2lsQGthbHR1cmEuY29tO2Rpc2FibGVlbnRpdGxlbWVudCxhcHBpZDprbWM7Ow==";
+    const ks = "";
 
     // const [ks, setKs] = useState();
     const [client, setClient] = useState();
@@ -41,7 +41,8 @@ const App: React.FC = () => {
     const [camStatus, setCameraStatus] = useState(CameraStatus.init);
     const [appState, setAppState] = useState(AppState.camera);
 
-    const buttonClicked = (isPreview?: boolean) => {
+    const buttonClicked = () => {
+        console.log(">>>> buttonClicked appState",appState);
         if (appState === AppState.camera && webcamRef.current) {
             setAppState(AppState.preview);
             // we have an active camera
@@ -57,9 +58,9 @@ const App: React.FC = () => {
         }
     };
 
-    // cammera shutter effect
+    // camera shutter effect
     useEffect(() => {
-        if (appState === AppState.camera) {
+        if (appState === AppState.camera || appState === AppState.done) {
             (previewRef.current as any).src = "";
         }
         if (appState === AppState.preview || appState === AppState.camera) {
@@ -67,7 +68,7 @@ const App: React.FC = () => {
             (camEffect.current as any).classList.add("show");
             setTimeout(() => {
                 (camEffect.current as any).classList.remove("show");
-            }, 500);
+            }, 600);
         }
     }, [appState]);
 
@@ -136,7 +137,7 @@ const App: React.FC = () => {
             }
             <header className="App-header">
 
-                {(appState === AppState.preview || appState === AppState.done ) &&
+                {(appState === AppState.preview || appState === AppState.done) &&
                 <button className={"button"}><img src={xx} alt="Close" className={"close-button"}
                                                   onClick={() => {
                                                       setBlob(null);
@@ -153,10 +154,12 @@ const App: React.FC = () => {
                             videoConstraints={{
                                 facingMode: "user"
                             }}
-                            onUserMedia={() => {
-                                setCameraStatus(CameraStatus.ready)
-                            }}
-                            onUserMediaError={() => {
+                            onLoadedData={
+                                () => setCameraStatus(CameraStatus.ready)
+                            }
+                            onErrorCapture={() => setAppState(AppState.error)}
+                            onUserMediaError={(e:any) => {
+                                alert(e)
                                 setAppState(AppState.notSupported)
                             }}
                             screenshotFormat={"image/jpeg"} screenshotQuality={1}/>
@@ -191,11 +194,11 @@ const App: React.FC = () => {
                                    }}
 
                                    onUploadStarted={(entryId) => {
-                                       console.log(">>>> STARTED ", entryId)
+                                       console.log(">>>> STARTED - Entry", entryId)
                                    }}
 
                                    onUploadProgress={(loaded, total) => {
-                                       console.log(">>> ", loaded, total)
+                                       console.log(">>> progress", loaded, total)
                                    }}
                                    entryName={"bobo.png"}
                                    serviceUrl={"https://www.kaltura.com"}

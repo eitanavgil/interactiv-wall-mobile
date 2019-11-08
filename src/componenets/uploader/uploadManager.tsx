@@ -96,7 +96,7 @@ export class UploadManager extends Component<Props, State> {
         const entry = new KalturaMediaEntry();
         entry.name = entryName;
         entry.mediaType = mediaType;
-        entry.adminTags = "expressrecorder";
+        entry.adminTags = "wall-app";
 
         // 1.Add entry
         requests.requests.push(
