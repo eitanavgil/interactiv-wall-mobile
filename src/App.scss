@@ -3,7 +3,16 @@
   background-image: url("./bg.png");
   font-family: 'Lato', sans-serif;
 }
-
+.credits{
+  position: absolute;
+  bottom:0px;
+  color: hsla(0,0%,100%,.3);
+  width: 98%;
+  left: 0;
+  font-size: 14px;
+  text-align: left;
+  text-shadow: 0 0 3px #000, 0 0 3px #000;
+}
 
 .App-header {
   height: 85vh;

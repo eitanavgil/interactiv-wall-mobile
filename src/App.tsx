@@ -205,6 +205,8 @@ const App: React.FC = () => {
                                    ks={ks}/>
                 }
             </header>
+            <span className={"credits"}>@funwall - Dana | Lior | Eitan
+</span>
         </div>
     );
 }
