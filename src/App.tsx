@@ -34,6 +34,25 @@ export const setCookie = (cname: string, cvalue: string, exdays: number) => {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
+export const iOS = () => {
+
+    const iDevices = [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+    ];
+
+    if (!!navigator.platform) {
+        while (iDevices.length) {
+            if (navigator.platform === iDevices.pop()){ return true; }
+        }
+    }
+    return false;
+}
+
 export const getCookie = (cname: string) => {
     var name = cname + "=";
     var decodedCookie = decodeURIComponent(document.cookie);
@@ -83,6 +102,7 @@ const App: React.FC = () => {
 
     // camera shutter effect
     useEffect(() => {
+        console.log(">>>> state changed to", appState);
         if (appState === AppState.camera || appState === AppState.done) {
             (previewRef.current as any).src = "";
         }
@@ -173,8 +193,21 @@ const App: React.FC = () => {
                 {(appState === AppState.preview || appState === AppState.done) &&
                 <button className={"button"}><img src={xx} alt="Close" className={"close-button"}
                                                   onClick={() => {
+
+                                                      if(iOS){
+                                                          // bug - refresh page
+                                                          (window as any).location.reload();
+                                                          return
+                                                      }
+                                                      try {
+                                                          (previewRef.current as any).src = "";
+                                                      } catch (e) {
+                                                          console.log(">>>> Failed cleaning preview",);
+                                                      }
                                                       setBlob(null);
-                                                      setAppState(AppState.camera)
+                                                      setTimeout(() => {
+                                                          setAppState(AppState.camera)
+                                                      }, 500)
                                                   }}
                 /></button>
                 }
@@ -192,7 +225,6 @@ const App: React.FC = () => {
                             }
                             onErrorCapture={() => setAppState(AppState.error)}
                             onUserMediaError={(e: any) => {
-                                alert(e)
                                 setAppState(AppState.notSupported)
                             }}
                             screenshotFormat={"image/jpeg"} screenshotQuality={0.8}/>
