@@ -27,22 +27,45 @@ export enum CameraStatus {
     ready = "ready",
 }
 
+export const setCookie = (cname: string, cvalue: string, exdays: number) => {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+export const getCookie = (cname: string) => {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
 const App: React.FC = () => {
 
     const webcamRef = useRef(null);
     const previewRef = useRef(null);
     const camEffect = useRef(null);
     const uploadManager = useRef(null);
-    const ks = "";
+    const ks = "dwjJ8MjYxMjE4MnxfP8MM6uFoMLGAvdXNsKywWkAc0xAP3neoKas7XIjKGe9HIrYv4mWJ1QM1xvU-RKQoswdhBYjeuVdYRGflXk9n";
 
     // const [ks, setKs] = useState();
+    const [persistancy, setPersistancy] = useState("");
     const [client, setClient] = useState();
     const [blob, setBlob] = useState();
     const [camStatus, setCameraStatus] = useState(CameraStatus.init);
     const [appState, setAppState] = useState(AppState.camera);
 
     const buttonClicked = () => {
-        console.log(">>>> buttonClicked appState",appState);
         if (appState === AppState.camera && webcamRef.current) {
             setAppState(AppState.preview);
             // we have an active camera
@@ -85,6 +108,16 @@ const App: React.FC = () => {
             ks: ks
         });
         setClient(kalturaClient);
+        // return;
+        // cookie user
+        const userCookie = getCookie("projector");
+        if (!userCookie) {
+            const userId = Math.round(Math.random() * 100000);
+            setPersistancy(userId.toString())
+        } else {
+            setPersistancy(userCookie);
+        }
+
 
     }, []);
 
@@ -158,11 +191,11 @@ const App: React.FC = () => {
                                 () => setCameraStatus(CameraStatus.ready)
                             }
                             onErrorCapture={() => setAppState(AppState.error)}
-                            onUserMediaError={(e:any) => {
+                            onUserMediaError={(e: any) => {
                                 alert(e)
                                 setAppState(AppState.notSupported)
                             }}
-                            screenshotFormat={"image/jpeg"} screenshotQuality={1}/>
+                            screenshotFormat={"image/jpeg"} screenshotQuality={0.8}/>
                 </div>
                 {
                     camStatus === CameraStatus.ready &&
@@ -200,7 +233,7 @@ const App: React.FC = () => {
                                    onUploadProgress={(loaded, total) => {
                                        console.log(">>> progress", loaded, total)
                                    }}
-                                   entryName={"bobo.png"}
+                                   entryName={persistancy + "-bobo.png"}
                                    serviceUrl={"https://www.kaltura.com"}
                                    ks={ks}/>
                 }
