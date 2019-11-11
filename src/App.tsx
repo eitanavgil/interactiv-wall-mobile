@@ -47,7 +47,9 @@ export const iOS = () => {
 
     if (!!navigator.platform) {
         while (iDevices.length) {
-            if (navigator.platform === iDevices.pop()){ return true; }
+            if (navigator.platform === iDevices.pop()) {
+                return true;
+            }
         }
     }
     return false;
@@ -75,7 +77,7 @@ const App: React.FC = () => {
     const previewRef = useRef(null);
     const camEffect = useRef(null);
     const uploadManager = useRef(null);
-    const ks = "dwjJ8MjYxMjE4MnxfP8MM6uFoMLGAvdXNsKywWkAc0xAP3neoKas7XIjKGe9HIrYv4mWJ1QM1xvU-RKQoswdhBYjeuVdYRGflXk9n";
+    const ks = "dWjJ8MjYxMjE4MnyMIVQkiPfd40S-YYl7q5UlNSiQugxLPvCEh0mKww1nHCY7__UZZPDCw1meNvPpNwADAduWSsNck2iysmtEQd1R";
 
     // const [ks, setKs] = useState();
     const [persistancy, setPersistancy] = useState("");
@@ -137,6 +139,9 @@ const App: React.FC = () => {
         } else {
             setPersistancy(userCookie);
         }
+        if (navigator.userAgent.match('CriOS')) {
+            setAppState(AppState.error);
+        }
 
 
     }, []);
@@ -146,17 +151,32 @@ const App: React.FC = () => {
             <div className="loader-container">
                 <div className="loader"></div>
             </div>
-
             <div className="cam-effect" ref={camEffect}></div>
             <img src={logo} alt="Logo" className={"logo"}/>
             {appState === AppState.error &&
             <div className="error-container">
                 <div className="error">
                     <div>
-                        Something went wrong
+                        {
+                            !navigator.userAgent.match('CriOS') &&
+                            "Something went wrong"
+                        }
                     </div>
                     <div>
-                        Please try again later.
+                        {
+                            !navigator.userAgent.match('CriOS') &&
+                            "Please try again later."
+                        }
+                        {
+                            navigator.userAgent.match('CriOS') && <div>
+                                Chrome on iPhone is not supported
+                            </div>
+                        }
+                        {
+                            navigator.userAgent.match('CriOS') && <div>
+                                Try Safari
+                            </div>
+                        }
                     </div>
                     <img className={"sad"} src={sad} alt="Booo..."/>
                 </div>
@@ -194,7 +214,7 @@ const App: React.FC = () => {
                 <button className={"button"}><img src={xx} alt="Close" className={"close-button"}
                                                   onClick={() => {
 
-                                                      if(iOS){
+                                                      if (iOS) {
                                                           // bug - refresh page
                                                           (window as any).location.reload();
                                                           return
